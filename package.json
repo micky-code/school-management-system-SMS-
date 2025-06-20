@@ -5,9 +5,13 @@
     "build": "cd frontend && npm install && npm run build",
     "start": "cd frontend && npm start",
     "predeploy": "npm run build",
-    "deploy": "vercel"
+    "deploy": "vercel",
+    "install": "cd frontend && npm install"
   },
   "devDependencies": {
     "eslint-config-react-app": "^7.0.1"
+  },
+  "dependencies": {
+    "@vercel/static-build": "^1.0.0"
   }
 }
