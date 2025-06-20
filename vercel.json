@@ -31,5 +31,5 @@
   "env": {
     "NEXT_PUBLIC_API_URL": "https://your-backend-api-url"
   },
-  "framework": "react"
+  "framework": "vite"
 }
