@@ -8,8 +8,7 @@
         "distDir": "build",
         "installCommand": "npm install",
         "buildCommand": "npm run build",
-        "outputDirectory": "build",
-        "framework": "react"
+        "outputDirectory": "build"
       }
     }
   ],
@@ -20,16 +19,16 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/$1",
-      "continue": true
-    },
+      "dest": "/$1"
+    }
+  ],
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ],
   "env": {
     "NEXT_PUBLIC_API_URL": "https://your-backend-api-url"
-  },
-  "framework": "react"
+  }
 }
