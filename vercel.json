@@ -5,14 +5,29 @@
       "src": "frontend/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "build"
+        "distDir": "build",
+        "installCommand": "npm install",
+        "buildCommand": "npm run build",
+        "outputDirectory": "build"
       }
     }
   ],
   "routes": [
     {
+      "src": "/api/(.*)",
+      "dest": "https://your-backend-api-url/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1",
+      "continue": true
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ]
+  ],
+  "env": {
+    "NEXT_PUBLIC_API_URL": "https://your-backend-api-url"
+  }
 }
