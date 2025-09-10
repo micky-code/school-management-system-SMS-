@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Majors Frontend Issue</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #0056b3; }
+        button.fix { background-color: #28a745; }
+        button.fix:hover { background-color: #218838; }
+        pre {
+            background-color: #f1f1f1;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .test-section {
+            border-left: 4px solid #007bff;
+            padding-left: 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Debug Majors Frontend "No Data Available" Issue</h1>
+        
+        <div class="warning">
+            <strong>Issue:</strong> Majors page shows "No data available" despite backend working correctly.
+        </div>
+
+        <div class="test-section">
+            <h2>🔍 Diagnostic Tests</h2>
+            <button onclick="testBackendConnection()">1. Test Backend Connection</button>
+            <button onclick="testMajorsAPI()">2. Test Majors API</button>
+            <button onclick="testAuthenticatedAPI()">3. Test with Auth Token</button>
+            <button onclick="testPublicEndpoint()">4. Test Public Endpoint</button>
+            <button onclick="simulateFrontendCall()">5. Simulate Frontend API Call</button>
+        </div>
+
+        <div class="test-section">
+            <h2>🚀 Quick Fixes</h2>
+            <button class="fix" onclick="createWorkingMajorsPage()">Create Working Majors Test Page</button>
+            <button class="fix" onclick="showFrontendFixes()">Show Frontend Code Fixes</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        function showResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = message;
+            results.appendChild(div);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function testBackendConnection() {
+            clearResults();
+            showResult('🔍 Testing backend server connection...', 'info');
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/health');
+                if (response.ok) {
+                    showResult('✅ Backend server is running and responding!', 'success');
+                } else {
+                    showResult('⚠️ Backend server responded but with error status: ' + response.status, 'warning');
+                }
+            } catch (error) {
+                showResult('❌ Backend server connection failed: ' + error.message, 'error');
+                showResult('💡 Make sure your backend server is running: node server.js', 'info');
+            }
+        }
+
+        async function testMajorsAPI() {
+            showResult('🔍 Testing majors API endpoint...', 'info');
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/majors?page=1&limit=10');
+                const data = await response.json();
+                
+                if (response.status === 401) {
+                    showResult('✅ Majors API is working! (Requires authentication)', 'success');
+                    showResult('📝 Response: ' + JSON.stringify(data, null, 2), 'info');
+                } else if (response.ok) {
+                    showResult('✅ Majors API returned data successfully!', 'success');
+                    showResult('📊 Data: ' + JSON.stringify(data, null, 2), 'success');
+                } else {
+                    showResult('⚠️ Majors API error: ' + (data.message || 'Unknown error'), 'warning');
+                }
+            } catch (error) {
+                showResult('❌ Majors API test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testAuthenticatedAPI() {
+            showResult('🔍 Testing majors API with simulated authentication...', 'info');
+            
+            // Try to simulate what the frontend should do
+            try {
+                const token = localStorage.getItem('token') || 'test-token';
+                const response = await fetch('http://localhost:5000/api/majors?page=1&limit=10', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('✅ Authenticated API call successful!', 'success');
+                    showResult('📊 Majors data: ' + JSON.stringify(data.data?.slice(0, 3) || data, null, 2), 'success');
+                } else {
+                    showResult('⚠️ Authentication failed: ' + (data.message || 'Invalid token'), 'warning');
+                    showResult('💡 This is likely why frontend shows "No data available"', 'info');
+                }
+            } catch (error) {
+                showResult('❌ Authenticated API test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testPublicEndpoint() {
+            showResult('🔍 Testing public majors endpoint...', 'info');
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/public/majors');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    showResult('✅ Public majors endpoint working!', 'success');
+                    showResult('📊 Public data: ' + JSON.stringify(data, null, 2), 'success');
+                } else {
+                    showResult('⚠️ Public endpoint not available (404 expected)', 'warning');
+                    showResult('💡 Frontend should use fallback mechanism', 'info');
+                }
+            } catch (error) {
+                showResult('❌ Public endpoint test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function simulateFrontendCall() {
+            showResult('🔍 Simulating exact frontend API call pattern...', 'info');
+            
+            try {
+                // Simulate the exact call pattern from MajorService
+                const response = await fetch('http://localhost:5000/api/majors?page=1&limit=10&search=', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                        // Note: Real frontend would include Authorization header
+                    }
+                });
+                
+                const data = await response.json();
+                
+                showResult('📡 Frontend simulation response:', 'info');
+                showResult('Status: ' + response.status + ' ' + response.statusText, 'info');
+                showResult('Data: ' + JSON.stringify(data, null, 2), 'info');
+                
+                if (response.status === 401) {
+                    showResult('🎯 FOUND THE ISSUE: Frontend is not sending authentication token!', 'error');
+                    showResult('💡 Solution: Check if user is logged in and token is being sent', 'warning');
+                }
+            } catch (error) {
+                showResult('❌ Frontend simulation failed: ' + error.message, 'error');
+            }
+        }
+
+        function createWorkingMajorsPage() {
+            showResult('🚀 Creating a working majors test page...', 'info');
+            
+            const workingPageHTML = \`
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Working Majors Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .major { border: 1px solid #ddd; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>Working Majors Test Page</h1>
+    <div id="status"></div>
+    <div id="majors"></div>
+    
+    <script>
+        async function loadMajors() {
+            const status = document.getElementById('status');
+            const majorsDiv = document.getElementById('majors');
+            
+            try {
+                status.innerHTML = '<div class="success">Loading majors...</div>';
+                
+                // Try authenticated call first
+                let response = await fetch('http://localhost:5000/api/majors?page=1&limit=10');
+                let data = await response.json();
+                
+                if (response.ok) {
+                    // Success with auth
+                    displayMajors(data.data || data.rows || []);
+                } else if (response.status === 401) {
+                    // Try public endpoint as fallback
+                    status.innerHTML = '<div class="success">Trying public endpoint...</div>';
+                    response = await fetch('http://localhost:5000/api/public/majors');
+                    
+                    if (response.ok) {
+                        data = await response.json();
+                        displayMajors(data.data || data.rows || []);
+                    } else {
+                        status.innerHTML = '<div class="error">Both endpoints failed. Check backend.</div>';
+                    }
+                } else {
+                    status.innerHTML = '<div class="error">API Error: ' + data.message + '</div>';
+                }
+            } catch (error) {
+                status.innerHTML = '<div class="error">Connection Error: ' + error.message + '</div>';
+            }
+        }
+        
+        function displayMajors(majors) {
+            const status = document.getElementById('status');
+            const majorsDiv = document.getElementById('majors');
+            
+            if (majors.length === 0) {
+                status.innerHTML = '<div class="error">No majors found in database</div>';
+                return;
+            }
+            
+            status.innerHTML = '<div class="success">Found ' + majors.length + ' majors!</div>';
+            
+            majorsDiv.innerHTML = majors.map(major => \\\`
+                <div class="major">
+                    <h3>\\\${major.major_name || major.name}</h3>
+                    <p><strong>Department:</strong> \\\${major.department_name || 'N/A'}</p>
+                    <p><strong>Description:</strong> \\\${major.description || 'No description'}</p>
+                </div>
+            \\\`).join('');
+        }
+        
+        // Load majors when page loads
+        loadMajors();
+    </script>
+</body>
+</html>
+            \`;
+            
+            const blob = new Blob([workingPageHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            window.open(url, '_blank');
+            
+            showResult('✅ Working majors test page opened in new tab!', 'success');
+            showResult('💡 This page will show if majors data is accessible', 'info');
+        }
+
+        function showFrontendFixes() {
+            showResult('🔧 Frontend Code Fixes for "No Data Available":', 'info');
+            
+            const fixes = \`
+<h3>Possible Issues & Fixes:</h3>
+
+<h4>1. Authentication Issue (Most Likely)</h4>
+<pre>
+// Check if user is logged in
+const token = localStorage.getItem('token');
+if (!token) {
+    // User not logged in - redirect to login or use public endpoint
+    console.log('No auth token found');
+}
+
+// Make sure API calls include token
+const response = await fetch('/api/majors', {
+    headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+    }
+});
+</pre>
+
+<h4>2. API Base URL Issue</h4>
+<pre>
+// Check if API base URL is correct in your frontend config
+const API_BASE_URL = 'http://localhost:5000';
+// Make sure all API calls use this base URL
+</pre>
+
+<h4>3. CORS Issue</h4>
+<pre>
+// If you see CORS errors in browser console, add this to backend:
+app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true
+}));
+</pre>
+
+<h4>4. Frontend Service Issue</h4>
+<pre>
+// Check MajorService.getAll() method
+// Make sure it handles both 'data' and 'rows' properties
+if (response.data && response.data.data) {
+    return { rows: response.data.data, count: response.data.count };
+} else if (response.data && response.data.rows) {
+    return response.data;
+}
+</pre>
+            \`;
+            
+            showResult(fixes, 'info');
+        }
+
+        // Auto-run basic test when page loads
+        window.onload = function() {
+            showResult('🔧 Majors Frontend Debug Tool Loaded', 'info');
+            showResult('Click the diagnostic buttons above to identify the issue', 'info');
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Connection Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🧪 API Connection Test</h1>
+    
+    <div>
+        <button onclick="testBackendHealth()">Test Backend Health</button>
+        <button onclick="testPrograms()">Test Programs API</button>
+        <button onclick="testAuth()">Test Authentication</button>
+        <button onclick="clearResults()">Clear Results</button>
+    </div>
+    
+    <div id="results"></div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+        
+        function addResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = message;
+            results.appendChild(div);
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        async function testBackendHealth() {
+            addResult('🔍 Testing backend health...', 'info');
+            
+            try {
+                const response = await fetch('http://localhost:5000/');
+                const text = await response.text();
+                
+                if (response.ok) {
+                    addResult(`✅ Backend Health: OK (${response.status})`, 'success');
+                    addResult(`Response: ${text}`, 'info');
+                } else {
+                    addResult(`❌ Backend Health: Failed (${response.status})`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ Backend Health: Connection Error - ${error.message}`, 'error');
+            }
+        }
+        
+        async function testPrograms() {
+            addResult('🔍 Testing programs API...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/programs`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addResult(`✅ Programs API: OK (${response.status})`, 'success');
+                    addResult(`Found ${data.data ? data.data.length : 0} programs`, 'success');
+                    addResult(`<pre>${JSON.stringify(data, null, 2)}</pre>`, 'info');
+                } else {
+                    addResult(`❌ Programs API: Failed (${response.status})`, 'error');
+                    addResult(`<pre>${JSON.stringify(data, null, 2)}</pre>`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ Programs API: Connection Error - ${error.message}`, 'error');
+            }
+        }
+        
+        async function testAuth() {
+            addResult('🔍 Testing authentication...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: 'admin',
+                        password: 'password'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addResult(`✅ Authentication: OK (${response.status})`, 'success');
+                    addResult(`User: ${data.user ? data.user.username : 'Unknown'}`, 'success');
+                    addResult(`<pre>${JSON.stringify(data, null, 2)}</pre>`, 'info');
+                } else {
+                    addResult(`❌ Authentication: Failed (${response.status})`, 'error');
+                    addResult(`<pre>${JSON.stringify(data, null, 2)}</pre>`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ Authentication: Connection Error - ${error.message}`, 'error');
+            }
+        }
+        
+        // Auto-run tests on page load
+        window.onload = function() {
+            addResult('🚀 Starting API tests...', 'info');
+            setTimeout(testBackendHealth, 500);
+            setTimeout(testPrograms, 1500);
+        };
+    </script>
+</body>
+</html>
